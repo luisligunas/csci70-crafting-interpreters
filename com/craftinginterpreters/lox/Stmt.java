@@ -10,6 +10,7 @@ abstract class Stmt {
     R visitPrintStmt(Print stmt);
     R visitVarStmt(Var stmt);
     R visitWhileStmt(While stmt);
+    R visitDoWhileStmt(DoWhile stmt);
   }
   static class Block extends Stmt {
     Block(List<Stmt> statements) {
@@ -86,6 +87,20 @@ abstract class Stmt {
     @Override
     <R> R accept(Visitor<R> visitor) {
       return visitor.visitWhileStmt(this);
+    }
+
+    final Expr condition;
+    final Stmt body;
+  }
+  static class DoWhile extends Stmt {
+    DoWhile(Expr condition, Stmt body) {
+      this.condition = condition;
+      this.body = body;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitDoWhileStmt(this);
     }
 
     final Expr condition;

@@ -224,4 +224,13 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
   public Object visitVariableExpr(Expr.Variable expr) {
     return environment.get(expr.name);
   }
+
+  // Do While
+  @Override
+  public Void visitDoWhileStmt(Stmt.DoWhile stmt) {
+    do {
+      execute(stmt.body);
+    } while (isTruthy(evaluate(stmt.condition)));
+    return null;
+  }
 }
