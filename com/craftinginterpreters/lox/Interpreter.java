@@ -51,6 +51,10 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
   private boolean isTruthy(Object object) {
     if (object == null) return false;
     if (object instanceof Boolean) return (boolean)object;
+    if (object instanceof Number) 
+    {
+      if((double)object==0) return false;
+    }
     return true;
   }
 
