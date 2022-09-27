@@ -41,6 +41,7 @@ class Parser {
   }
 
   private Stmt statement() {
+    if (match(PRINT)) return printStatement();
     if (match(FOR)) return forStatement();
     if (match(IF)) return ifStatement();
     if (match(PRINT)) return printStatement();
@@ -153,6 +154,7 @@ class Parser {
   }  
 
   private Expr assignment() {
+    Expr expr = equality();
     Expr expr = or();
 
     if (match(EQUAL)) {
