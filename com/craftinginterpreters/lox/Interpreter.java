@@ -29,8 +29,16 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     	Object right = evaluate(expr.right);
 
 	    switch (expr.operator.type) {
-	    	case BANG:
-	        	return !isTruthy(right);
+	    	case BANG: // needs to compile
+			/** 
+				if (right instanceof Double):
+					if(right == 0):
+						return true;
+					if(right != 0):
+						return false;
+				if (right instanceof Boolean):
+				*/
+	        		return !isTruthy(right);
 	    	case MINUS:
     	        checkNumberOperand(expr.operator, right);
 	        	return -(double)right;
@@ -58,6 +66,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
 	private boolean isTruthy(Object object) {
     	if (object == null) return false;
+		if (object instanceof Double && (double)object == 0) return false;
     	if (object instanceof Boolean) return (boolean)object;
     		return true;
 	}
@@ -122,7 +131,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	    return null;
   	}
 
-	  @Override
+  @Override
   public Void visitIfStmt(Stmt.If stmt) {
     if (isTruthy(evaluate(stmt.condition))) {
       execute(stmt.thenBranch);
@@ -136,6 +145,15 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	    Object value = evaluate(stmt.expression);
 	    System.out.println(stringify(value));
 	    return null;
+	}
+
+	@Override
+	public Void visitDoStmt(Stmt.Do stmt){
+		execute(stmt.body);
+		while (isTruthy(evaluate(stmt.condition))) {
+			execute(stmt.body);
+	    }
+	 	return null;
 	}
 
 	@Override
@@ -193,7 +211,6 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 				if (left instanceof String && right instanceof String) {
 					return (String)left + (String)right;
 				}
-
 				throw new RuntimeError(expr.operator, "Operands must be two numbers or two strings.");
 	    	case SLASH:
 	    		checkNumberOperands(expr.operator, left, right);

@@ -46,6 +46,7 @@ class Parser {
     if (match(IF)) return ifStatement();
     if (match(PRINT)) return printStatement();
     if (match(WHILE)) return whileStatement();
+    if (match(DO)) return doStatement();
     if (match(LEFT_BRACE)) return new Stmt.Block(block());    
 
     return expressionStatement();
@@ -136,6 +137,16 @@ class Parser {
     return new Stmt.While(condition, body);
   }
 
+  private Stmt doStatement() {
+    Stmt body = statement();
+    consume(WHILE, "Expect 'while' after statement body.");
+    consume(LEFT_PAREN, "Expect '(' after 'while'.");
+    Expr condition = expression();
+    consume(RIGHT_PAREN, "Expect ')' after condition.");
+    
+    return new Stmt.Do(body, condition);
+  }
+
   private Stmt expressionStatement() {
     Expr expr = expression();
     consume(SEMICOLON, "Expect ';' after expression.");
@@ -208,21 +219,9 @@ class Parser {
   }
 
   private Expr comparison() {
-    Expr expr = term();
-
-    while (match(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) {
-      Token operator = previous();
-      Expr right = term();
-      expr = new Expr.Binary(expr, operator, right);
-    }
-
-    return expr;
-  }
-
-  private Expr term() {
     Expr expr = factor();
 
-    while (match(MINUS, PLUS)) {
+    while (match(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) {
       Token operator = previous();
       Expr right = factor();
       expr = new Expr.Binary(expr, operator, right);
@@ -231,12 +230,24 @@ class Parser {
     return expr;
   }
 
-  private Expr factor() {
+  private Expr term() {
     Expr expr = unary();
+
+    while (match(MINUS, PLUS)) {
+      Token operator = previous();
+      Expr right = unary();
+      expr = new Expr.Binary(expr, operator, right);
+    }
+
+    return expr;
+  }
+
+  private Expr factor() {
+    Expr expr = term();
 
     while (match(SLASH, STAR)) {
       Token operator = previous();
-      Expr right = unary();
+      Expr right = term();
       expr = new Expr.Binary(expr, operator, right);
     }
 
@@ -252,6 +263,7 @@ class Parser {
 
     return primary();
   }
+// Here ----------------
 
   private Expr primary() {
     if (match(FALSE)) return new Expr.Literal(false);
